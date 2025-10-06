@@ -9,41 +9,38 @@
 </head>
 <body>
     <!-- Nickname Modal -->
-    <div id="nickname-modal" class="modal">
-        <div class="modal-content">
+    <div id="nickname-modal" class="modal-overlay">
+        <div class="modal-container">
             <div class="modal-header">
                 <i class="fas fa-user-circle"></i>
-                <h2>Welcome to Debezium Chat!</h2>
+                <h2>Choose Your Nickname</h2>
             </div>
             <div class="modal-body">
-                <p>Please choose a nickname to get started</p>
-                <div class="nickname-input-group">
-                    <input 
-                        type="text" 
-                        id="nickname-input" 
-                        placeholder="Enter your nickname"
-                        maxlength="20"
-                        autocomplete="off"
-                    />
-                    <span class="nickname-char-count">
-                        <span id="nickname-char-count">0</span>/20
-                    </span>
-                </div>
-                <div id="nickname-error" class="nickname-error"></div>
-                <div class="nickname-rules">
-                    <i class="fas fa-info-circle"></i>
-                    <ul>
-                        <li>3-20 characters</li>
-                        <li>Letters, numbers, and underscores only</li>
-                        <li>Must be unique</li>
-                    </ul>
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button id="nickname-submit" class="nickname-submit-btn">
-                    <i class="fas fa-check"></i>
-                    <span>Join Chat</span>
-                </button>
+                <p class="modal-description">Enter a nickname to join the chat (2-20 characters, letters, numbers, spaces, _ and - allowed)</p>
+                <form id="nickname-form" onsubmit="submitNickname(event)">
+                    <div class="form-group">
+                        <label for="nickname-input">
+                            <i class="fas fa-user"></i> Nickname
+                        </label>
+                        <input 
+                            type="text" 
+                            id="nickname-input" 
+                            placeholder="Enter your nickname..."
+                            maxlength="20"
+                            autocomplete="off"
+                            required
+                        />
+                        <div class="nickname-char-count">
+                            <span id="nickname-char-count">0</span>/20
+                        </div>
+                        <div id="nickname-error" class="error-message"></div>
+                    </div>
+                    <div class="modal-actions">
+                        <button type="submit" class="btn-primary">
+                            <i class="fas fa-check"></i> Join Chat
+                        </button>
+                    </div>
+                </form>
             </div>
         </div>
     </div>
@@ -63,8 +60,8 @@
                     </div>
                     <div class="user-id">
                         <i class="fas fa-user"></i>
-                        <span id="user-nickname-display">Nickname: <span id="ws-id"></span></span>
-                        <button id="change-nickname-btn" class="change-nickname-btn" title="Change Nickname">
+                        <span id="nickname-display">Guest</span>
+                        <button id="edit-nickname-btn" class="edit-nickname-btn" onclick="editNickname()" title="Edit Nickname">
                             <i class="fas fa-edit"></i>
                         </button>
                     </div>
