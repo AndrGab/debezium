@@ -36,6 +36,8 @@ class KafkaConsumer(AIOKafkaConsumer):
                                 case 'd':
                                     changes = data.get('payload', {}).get('before', {})
                                     message = f'SuperHero [Deleted]: {changes}'
+                                case _:
+                                    continue
                             await manager.broadcast(message)
                 except Exception as e:
                     print(e)

@@ -3,34 +3,143 @@ let client_id = Date.now();
 let ws;
 let messageCount = 0;
 let isConnected = false;
+let nickname = null;
+let nicknameAccepted = false;
 
 // Initialize the application
 document.addEventListener('DOMContentLoaded', function() {
-    initializeWebSocket();
+    showNicknameModal();
     setupEventListeners();
+    setupNicknameModal();
     updateConnectionStatus('connecting', 'Connecting...');
 });
 
+// Nickname Modal Management
+function showNicknameModal() {
+    const modal = document.getElementById('nickname-modal');
+    modal.classList.remove('hidden');
+    const input = document.getElementById('nickname-input');
+    setTimeout(() => input.focus(), 100);
+}
+
+function hideNicknameModal() {
+    const modal = document.getElementById('nickname-modal');
+    modal.classList.add('hidden');
+}
+
+function setupNicknameModal() {
+    const input = document.getElementById('nickname-input');
+    const submitBtn = document.getElementById('nickname-submit');
+    const charCount = document.getElementById('nickname-char-count');
+    const errorDiv = document.getElementById('nickname-error');
+    
+    // Character counter
+    input.addEventListener('input', function() {
+        charCount.textContent = this.value.length;
+        errorDiv.textContent = ''; // Clear error on input
+    });
+    
+    // Submit on Enter key
+    input.addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+            submitBtn.click();
+        }
+    });
+    
+    // Submit button
+    submitBtn.addEventListener('click', function() {
+        const nicknameValue = input.value.trim();
+        
+        // Client-side validation
+        if (!nicknameValue) {
+            errorDiv.textContent = 'Nickname cannot be empty';
+            return;
+        }
+        
+        if (nicknameValue.length < 3) {
+            errorDiv.textContent = 'Nickname must be at least 3 characters';
+            return;
+        }
+        
+        if (nicknameValue.length > 20) {
+            errorDiv.textContent = 'Nickname cannot exceed 20 characters';
+            return;
+        }
+        
+        if (!/^[a-zA-Z0-9_]+$/.test(nicknameValue)) {
+            errorDiv.textContent = 'Only letters, numbers, and underscores allowed';
+            return;
+        }
+        
+        // Disable button while connecting
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i><span>Connecting...</span>';
+        
+        nickname = nicknameValue;
+        initializeWebSocket();
+    });
+}
+
 // WebSocket connection management
 function initializeWebSocket() {
-    document.querySelector("#ws-id").textContent = client_id;
     ws = new WebSocket(`ws://localhost:8000/ws/${client_id}`);
     
     ws.onopen = function(event) {
         isConnected = true;
         updateConnectionStatus('connected', 'Connected');
-        addSystemMessage('Connected to Debezium Real-Time Chat! 🚀');
+        
+        // Send nickname as first message
+        if (nickname && !nicknameAccepted) {
+            ws.send(`NICKNAME:${nickname}`);
+        }
     };
     
     ws.onmessage = function(event) {
-        handleIncomingMessage(event.data);
+        const data = event.data;
+        
+        // Handle nickname acceptance/rejection
+        if (data.startsWith('NICKNAME_ACCEPTED:')) {
+            nicknameAccepted = true;
+            const acceptedNickname = data.replace('NICKNAME_ACCEPTED:', '');
+            document.querySelector("#ws-id").textContent = acceptedNickname;
+            hideNicknameModal();
+            addSystemMessage('Connected to Debezium Real-Time Chat! 🚀');
+            return;
+        }
+        
+        if (data.startsWith('NICKNAME_ERROR:')) {
+            const error = data.replace('NICKNAME_ERROR:', '');
+            const errorDiv = document.getElementById('nickname-error');
+            const submitBtn = document.getElementById('nickname-submit');
+            
+            errorDiv.textContent = error;
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = '<i class="fas fa-check"></i><span>Join Chat</span>';
+            
+            // Close websocket and reset
+            ws.close();
+            isConnected = false;
+            nicknameAccepted = false;
+            updateConnectionStatus('disconnected', 'Nickname rejected');
+            return;
+        }
+        
+        // Handle regular messages
+        handleIncomingMessage(data);
     };
     
     ws.onclose = function(event) {
         isConnected = false;
         updateConnectionStatus('disconnected', 'Disconnected');
-        addSystemMessage('Connection lost. Attempting to reconnect...');
-        setTimeout(initializeWebSocket, 3000);
+        
+        if (nicknameAccepted) {
+            addSystemMessage('Connection lost. Attempting to reconnect...');
+            // Reset for reconnection
+            nicknameAccepted = false;
+            setTimeout(() => {
+                showNicknameModal();
+            }, 3000);
+        }
     };
     
     ws.onerror = function(error) {
@@ -169,6 +278,12 @@ function sendMessage(event) {
     const input = document.getElementById("messageText");
     const message = input.value.trim();
     
+    if (!nicknameAccepted) {
+        addSystemMessage("Please set your nickname first");
+        event.preventDefault();
+        return;
+    }
+    
     if (message !== "" && isConnected) {
         ws.send(message);
         input.value = "";
@@ -191,11 +306,11 @@ function addUserMessage(message) {
     
     const contentDiv = document.createElement("div");
     contentDiv.className = "message-content";
-    contentDiv.textContent = `👤 You: ${message}`;
+    contentDiv.textContent = `👤 ${nickname}: ${message}`;
     
     const metaDiv = document.createElement("div");
     metaDiv.className = "message-meta";
-    metaDiv.innerHTML = `<span class="message-type update">USER</span><span>${new Date().toLocaleTimeString()}</span>`;
+    metaDiv.innerHTML = `<span class="message-type update">YOU</span><span>${new Date().toLocaleTimeString()}</span>`;
     
     messageDiv.appendChild(contentDiv);
     messageDiv.appendChild(metaDiv);
