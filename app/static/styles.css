@@ -318,6 +318,29 @@ body {
     opacity: 0.9;
 }
 
+.change-nickname-btn {
+    background: rgba(255, 255, 255, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    color: white;
+    padding: 0.25rem 0.5rem;
+    border-radius: 0.375rem;
+    font-size: 0.75rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+.change-nickname-btn:hover {
+    background: rgba(255, 255, 255, 0.3);
+    transform: scale(1.05);
+}
+
+.change-nickname-btn:active {
+    transform: scale(0.95);
+}
+
 /* Main Chat Area */
 .chat-main {
     display: flex;

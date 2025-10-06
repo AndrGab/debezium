@@ -8,10 +8,20 @@ let nicknameAccepted = false;
 
 // Initialize the application
 document.addEventListener('DOMContentLoaded', function() {
-    showNicknameModal();
     setupEventListeners();
     setupNicknameModal();
     updateConnectionStatus('connecting', 'Connecting...');
+    
+    // Check for saved nickname in localStorage
+    const savedNickname = localStorage.getItem('chatNickname');
+    if (savedNickname) {
+        nickname = savedNickname;
+        // Try to connect with saved nickname
+        initializeWebSocket();
+    } else {
+        // Show modal if no saved nickname
+        showNicknameModal();
+    }
 });
 
 // Nickname Modal Management
@@ -102,6 +112,10 @@ function initializeWebSocket() {
             nicknameAccepted = true;
             const acceptedNickname = data.replace('NICKNAME_ACCEPTED:', '');
             document.querySelector("#ws-id").textContent = acceptedNickname;
+            
+            // Save nickname to localStorage on successful acceptance
+            localStorage.setItem('chatNickname', acceptedNickname);
+            
             hideNicknameModal();
             addSystemMessage('Connected to Debezium Real-Time Chat! 🚀');
             return;
@@ -115,6 +129,10 @@ function initializeWebSocket() {
             errorDiv.textContent = error;
             submitBtn.disabled = false;
             submitBtn.innerHTML = '<i class="fas fa-check"></i><span>Join Chat</span>';
+            
+            // If saved nickname was rejected, clear it and show modal
+            localStorage.removeItem('chatNickname');
+            showNicknameModal();
             
             // Close websocket and reset
             ws.close();
@@ -170,6 +188,44 @@ function setupEventListeners() {
             sendMessage(event);
         }
     });
+    
+    // Change nickname button
+    const changeNicknameBtn = document.getElementById('change-nickname-btn');
+    if (changeNicknameBtn) {
+        changeNicknameBtn.addEventListener('click', function() {
+            changeNickname();
+        });
+    }
+}
+
+// Change nickname function
+function changeNickname() {
+    if (confirm('Are you sure you want to change your nickname? You will need to reconnect.')) {
+        // Clear saved nickname
+        localStorage.removeItem('chatNickname');
+        
+        // Close current connection
+        if (ws) {
+            ws.close();
+        }
+        
+        // Reset state
+        isConnected = false;
+        nicknameAccepted = false;
+        nickname = null;
+        
+        // Show modal
+        showNicknameModal();
+        
+        // Clear the input
+        const input = document.getElementById('nickname-input');
+        if (input) {
+            input.value = '';
+            document.getElementById('nickname-char-count').textContent = '0';
+        }
+        
+        updateConnectionStatus('disconnected', 'Disconnected');
+    }
 }
 
 // Connection status management
@@ -366,3 +422,4 @@ window.insertSampleData = insertSampleData;
 window.updateSampleData = updateSampleData;
 window.deleteSampleData = deleteSampleData;
 window.sendMessage = sendMessage;
+window.changeNickname = changeNickname;
