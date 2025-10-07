@@ -25,9 +25,9 @@ class KafkaConsumer(AIOKafkaConsumer):
                         if msg.value:
                             data = json.loads(msg.value)
                             operation = data.get('payload', {}).get('op', {})
-                            
+
                             message = None  # Initialize message variable to prevent UnboundLocalError
-                            
+
                             match operation:
                                 case 'u':
                                     changes = data.get('payload', {}).get('after', {})
@@ -44,8 +44,8 @@ class KafkaConsumer(AIOKafkaConsumer):
                                     message = f'📸 SuperHero [Snapshot]: {changes}'
                                 case _:
                                     # Log unknown operation types for debugging
-                                    print(f"Unknown CDC operation: {operation}")
-                            
+                                    print(f'Unknown CDC operation: {operation}')
+
                             # Only broadcast if we have a message to send
                             if message:
                                 await manager.broadcast(message)
