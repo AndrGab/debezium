@@ -6,6 +6,8 @@
 [![Docker](https://img.shields.io/badge/docker-ready-blue.svg)](https://www.docker.com/)
 [![Debezium](https://img.shields.io/badge/Debezium-CDC-red.svg)](https://debezium.io/)
 
+> ⭐ **If you find this project helpful, please consider giving it a star!** It helps others discover this learning resource and motivates us to keep improving it. Thank you! ⭐
+
 ## 🎉 Participating in Hacktoberfest 2025!
 
 This project is **officially participating** in [Hacktoberfest 2025](https://hacktoberfest.com/participation/)! 🚀
