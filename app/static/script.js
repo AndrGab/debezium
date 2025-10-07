@@ -92,26 +92,36 @@ function handleIncomingMessage(messageData) {
 }
 
 // Create message element
-function createMessageElement(messageData) {
+    function createMessageElement(messageData) {
     const messageDiv = document.createElement("div");
-    messageDiv.className = "message-item";
-    
-    // Determine message type and styling
-    let messageType = 'cdc';
-    let typeLabel = 'CDC';
-    
-    if (messageData.includes("Created")) {
-        messageType = 'create';
-        typeLabel = 'CREATE';
-    } else if (messageData.includes("Updated")) {
-        messageType = 'update';
-        typeLabel = 'UPDATE';
-    } else if (messageData.includes("Deleted")) {
-        messageType = 'delete';
-        typeLabel = 'DELETE';
-    }
-    
-    messageDiv.classList.add(messageType);
+    messageDiv.className = "message"; // unified style with fade-in animation
+
+    // Determine message type and label
+    let type = 'cdc';
+    if (messageData.includes("Created")) type = 'insert';
+    else if (messageData.includes("Updated")) type = 'update';
+    else if (messageData.includes("Deleted")) type = 'delete';
+
+    messageDiv.classList.add(type);
+
+    // Message content
+    const contentSpan = document.createElement("span");
+    contentSpan.textContent = messageData;
+
+    // Timestamp
+    const timeDiv = document.createElement("div");
+    timeDiv.className = "time";
+    timeDiv.textContent = new Date().toLocaleTimeString([], {
+        hour: '2-digit',
+        minute: '2-digit'
+    });
+
+    // Combine
+    messageDiv.appendChild(contentSpan);
+    messageDiv.appendChild(timeDiv);
+
+    return messageDiv;
+}
     
     // Create message content
     const contentDiv = document.createElement("div");
@@ -251,34 +261,3 @@ window.insertSampleData = insertSampleData;
 window.updateSampleData = updateSampleData;
 window.deleteSampleData = deleteSampleData;
 window.sendMessage = sendMessage;
-
-// ========================================================
-// Debezium Event Feed UI Script — Rickveloper Edition
-// ========================================================
-
-const container = document.getElementById('messages');
-
-/**
- * Add a message/event to the feed
- * @param {string} type - Event type (insert, update, delete)
- * @param {string} text - Text content for the message
- */
-function addMsg(type, text) {
-  const el = document.createElement('div');
-  el.className = 'message ' + type;
-
-  const time = new Date().toLocaleTimeString([], {
-    hour: '2-digit',
-    minute: '2-digit'
-  });
-
-  el.innerHTML = `<span>${text}</span><div class="time">${time}</div>`;
-
-  container.appendChild(el);
-  container.scrollTop = container.scrollHeight;
-}
-
-/* --- Demo Calls (can remove later) --- */
-addMsg('insert', 'New record added: Batman 🦇');
-addMsg('update', 'Updated user email field');
-addMsg('delete', 'Deleted old log entry');
