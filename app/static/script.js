@@ -251,3 +251,34 @@ window.insertSampleData = insertSampleData;
 window.updateSampleData = updateSampleData;
 window.deleteSampleData = deleteSampleData;
 window.sendMessage = sendMessage;
+
+// ========================================================
+// Debezium Event Feed UI Script — Rickveloper Edition
+// ========================================================
+
+const container = document.getElementById('messages');
+
+/**
+ * Add a message/event to the feed
+ * @param {string} type - Event type (insert, update, delete)
+ * @param {string} text - Text content for the message
+ */
+function addMsg(type, text) {
+  const el = document.createElement('div');
+  el.className = 'message ' + type;
+
+  const time = new Date().toLocaleTimeString([], {
+    hour: '2-digit',
+    minute: '2-digit'
+  });
+
+  el.innerHTML = `<span>${text}</span><div class="time">${time}</div>`;
+
+  container.appendChild(el);
+  container.scrollTop = container.scrollHeight;
+}
+
+/* --- Demo Calls (can remove later) --- */
+addMsg('insert', 'New record added: Batman 🦇');
+addMsg('update', 'Updated user email field');
+addMsg('delete', 'Deleted old log entry');
