@@ -525,3 +525,61 @@ body {
         text-align: center;
     }
 }
+/* ======================================================
+   CUSTOM ADDITIONS — Event Feed Styling (Hacktoberfest)
+   ====================================================== */
+.message {
+  max-width: 85%;
+  padding: 10px 14px;
+  border-radius: 12px;
+  line-height: 1.4;
+  word-wrap: break-word;
+  position: relative;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  opacity: 0;
+  transform: translateX(-25px);
+  animation: slideInLeft 0.45s ease-out forwards;
+  transition: box-shadow 0.3s ease, transform 0.3s ease;
+}
+
+.message.insert {
+  background-color: #e0f7fa;
+  color: #004d40;
+  border-left: 4px solid #009688;
+}
+
+.message.update {
+  background-color: #fff9c4;
+  color: #5d4037;
+  border-left: 4px solid #fbc02d;
+}
+
+.message.delete {
+  background-color: #ffebee;
+  color: #b71c1c;
+  border-left: 4px solid #f44336;
+}
+
+.message:hover {
+  box-shadow: 0 3px 8px rgba(0,0,0,0.15);
+  transform: translateX(-20px);
+}
+
+.message .time {
+  display: block;
+  text-align: right;
+  font-size: 11px;
+  color: rgba(0,0,0,0.5);
+  margin-top: 4px;
+}
+
+@keyframes slideInLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-25px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
