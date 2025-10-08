@@ -3,23 +3,115 @@ let client_id = Date.now();
 let ws;
 let messageCount = 0;
 let isConnected = false;
+let currentNickname = null;
 
 // Initialize the application
 document.addEventListener('DOMContentLoaded', function() {
-    initializeWebSocket();
     setupEventListeners();
-    updateConnectionStatus('connecting', 'Connecting...');
+    showNicknameModal();
+    updateConnectionStatus('connecting', 'Waiting for nickname...');
 });
+
+// Nickname Modal Functions
+function showNicknameModal() {
+    const modal = document.getElementById('nickname-modal');
+    modal.classList.remove('hidden');
+    
+    // Focus on input
+    setTimeout(() => {
+        document.getElementById('nickname-input').focus();
+    }, 100);
+}
+
+function hideNicknameModal() {
+    const modal = document.getElementById('nickname-modal');
+    modal.classList.add('hidden');
+}
+
+function validateNickname(nickname) {
+    const trimmed = nickname.trim();
+    
+    if (trimmed.length === 0) {
+        return { valid: false, error: 'Nickname cannot be empty' };
+    }
+    
+    if (trimmed.length < 2) {
+        return { valid: false, error: 'Nickname must be at least 2 characters' };
+    }
+    
+    if (trimmed.length > 20) {
+        return { valid: false, error: 'Nickname must be 20 characters or less' };
+    }
+    
+    // Allow alphanumeric, spaces, underscores, and hyphens
+    const regex = /^[a-zA-Z0-9_ -]+$/;
+    if (!regex.test(trimmed)) {
+        return { valid: false, error: 'Only letters, numbers, spaces, _ and - allowed' };
+    }
+    
+    return { valid: true, nickname: trimmed };
+}
+
+function submitNickname(event) {
+    event.preventDefault();
+    
+    const input = document.getElementById('nickname-input');
+    const errorDiv = document.getElementById('nickname-error');
+    const nickname = input.value;
+    
+    // Validate nickname
+    const validation = validateNickname(nickname);
+    
+    if (!validation.valid) {
+        errorDiv.textContent = validation.error;
+        errorDiv.classList.add('show');
+        input.focus();
+        return;
+    }
+    
+    // Hide error if any
+    errorDiv.classList.remove('show');
+    
+    // Store nickname and connect
+    currentNickname = validation.nickname;
+    document.getElementById('nickname-display').textContent = currentNickname;
+    
+    hideNicknameModal();
+    initializeWebSocket();
+}
+
+function editNickname() {
+    // Disconnect current WebSocket
+    if (ws && isConnected) {
+        ws.close();
+    }
+    
+    // Clear current nickname
+    currentNickname = null;
+    document.getElementById('nickname-input').value = '';
+    document.getElementById('nickname-char-count').textContent = '0';
+    
+    // Show modal again
+    showNicknameModal();
+    updateConnectionStatus('connecting', 'Waiting for nickname...');
+}
 
 // WebSocket connection management
 function initializeWebSocket() {
-    document.querySelector("#ws-id").textContent = client_id;
-    ws = new WebSocket(`ws://localhost:8000/ws/${client_id}`);
+    if (!currentNickname) {
+        showNicknameModal();
+        return;
+    }
+    
+    updateConnectionStatus('connecting', 'Connecting...');
+    
+    // Include nickname as query parameter
+    ws = new WebSocket(`ws://localhost:8000/ws/${client_id}?nickname=${encodeURIComponent(currentNickname)}`);
     
     ws.onopen = function(event) {
         isConnected = true;
         updateConnectionStatus('connected', 'Connected');
-        addSystemMessage('Connected to Debezium Real-Time Chat! 🚀');
+        addSystemMessage(`Connected to Debezium Real-Time Chat! 🚀`);
     };
     
     ws.onmessage = function(event) {
@@ -29,8 +121,18 @@ function initializeWebSocket() {
     ws.onclose = function(event) {
         isConnected = false;
         updateConnectionStatus('disconnected', 'Disconnected');
-        addSystemMessage('Connection lost. Attempting to reconnect...');
-        setTimeout(initializeWebSocket, 3000);
+        
+        // Check if close was due to nickname error
+        if (event.code === 1008) {
+            addSystemMessage(`❌ ${event.reason}`);
+            showNicknameModal();
+            const errorDiv = document.getElementById('nickname-error');
+            errorDiv.textContent = event.reason;
+            errorDiv.classList.add('show');
+        } else {
+            addSystemMessage('Connection lost. Attempting to reconnect...');
+            setTimeout(initializeWebSocket, 3000);
+        }
     };
     
     ws.onerror = function(error) {
@@ -44,9 +146,20 @@ function setupEventListeners() {
     const messageInput = document.getElementById("messageText");
     const charCount = document.getElementById("char-count");
     
-    // Character counter
+    // Character counter for message input
     messageInput.addEventListener('input', function() {
         charCount.textContent = this.value.length;
+    });
+    
+    // Character counter for nickname input
+    const nicknameInput = document.getElementById("nickname-input");
+    const nicknameCharCount = document.getElementById("nickname-char-count");
+    
+    nicknameInput.addEventListener('input', function() {
+        nicknameCharCount.textContent = this.value.length;
+        // Clear error on input
+        const errorDiv = document.getElementById('nickname-error');
+        errorDiv.classList.remove('show');
     });
     
     // Auto-resize input
@@ -201,7 +314,7 @@ function addUserMessage(message) {
     
     const contentDiv = document.createElement("div");
     contentDiv.className = "message-content";
-    contentDiv.textContent = `👤 You: ${message}`;
+    contentDiv.textContent = `👤 ${currentNickname || 'You'}: ${message}`;
     
     const metaDiv = document.createElement("div");
     metaDiv.className = "message-meta";
@@ -261,3 +374,5 @@ window.insertSampleData = insertSampleData;
 window.updateSampleData = updateSampleData;
 window.deleteSampleData = deleteSampleData;
 window.sendMessage = sendMessage;
+window.submitNickname = submitNickname;
+window.editNickname = editNickname;

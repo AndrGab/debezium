@@ -8,6 +8,43 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
 </head>
 <body>
+    <!-- Nickname Modal -->
+    <div id="nickname-modal" class="modal-overlay">
+        <div class="modal-container">
+            <div class="modal-header">
+                <i class="fas fa-user-circle"></i>
+                <h2>Choose Your Nickname</h2>
+            </div>
+            <div class="modal-body">
+                <p class="modal-description">Enter a nickname to join the chat (2-20 characters, letters, numbers, spaces, _ and - allowed)</p>
+                <form id="nickname-form" onsubmit="submitNickname(event)">
+                    <div class="form-group">
+                        <label for="nickname-input">
+                            <i class="fas fa-user"></i> Nickname
+                        </label>
+                        <input 
+                            type="text" 
+                            id="nickname-input" 
+                            placeholder="Enter your nickname..."
+                            maxlength="20"
+                            autocomplete="off"
+                            required
+                        />
+                        <div class="nickname-char-count">
+                            <span id="nickname-char-count">0</span>/20
+                        </div>
+                        <div id="nickname-error" class="error-message"></div>
+                    </div>
+                    <div class="modal-actions">
+                        <button type="submit" class="btn-primary">
+                            <i class="fas fa-check"></i> Join Chat
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
     <div class="app-container">
         <!-- Header -->
         <header class="header">
@@ -23,7 +60,10 @@
                     </div>
                     <div class="user-id">
                         <i class="fas fa-user"></i>
-                        <span>ID: <span id="ws-id"></span></span>
+                        <span id="nickname-display">Guest</span>
+                        <button id="edit-nickname-btn" class="edit-nickname-btn" onclick="editNickname()" title="Edit Nickname">
+                            <i class="fas fa-edit"></i>
+                        </button>
                     </div>
                 </div>
             </div>

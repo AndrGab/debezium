@@ -47,11 +47,46 @@ jobs:
               
               🏆 This counts towards your Hacktoberfest 2025 goals!
               
-              Thank you for contributing to our CDC learning project! 🚀`
+              Thank you for contributing to our CDC learning project! 🚀
+              
+              ---
+              
+              ⭐ Please don't forget to give us a star! Thank you! ⭐`
             });
             console.log('✅ Successfully added celebration comment');
           } catch (error) {
             console.log('⚠️ Could not add comment (this is normal for some repositories):', error.message);
+          }
+    
+    - name: 👋 Welcome new PR contributors
+      if: github.event.action == 'opened' && github.event.pull_request
+      uses: actions/github-script@v6
+      with:
+        script: |
+          const { owner, repo } = context.repo;
+          const { number } = context.payload.pull_request;
+          
+          try {
+            await github.rest.issues.createComment({
+              owner,
+              repo,
+              issue_number: number,
+              body: `👋 **Thank you for your contribution!**
+              
+              We appreciate you taking the time to help improve our CDC learning project! 🚀
+              
+              Your PR will be reviewed soon. In the meantime:
+              - ✅ Make sure your code follows our style guidelines
+              - 🧪 Check that all tests pass
+              - 📚 Update documentation if needed
+              
+              ---
+              
+              ⭐ Please don't forget to give us a star! Thank you! ⭐`
+            });
+            console.log('✅ Successfully added welcome comment');
+          } catch (error) {
+            console.log('⚠️ Could not add comment:', error.message);
           }
           
     - name: 🏷️ Auto-label PRs
