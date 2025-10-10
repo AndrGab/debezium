@@ -1,6 +1,7 @@
 import re
 
 from fastapi import APIRouter, Query, WebSocket
+from fastapi.responses import JSONResponse
 from starlette.websockets import WebSocketDisconnect
 
 from app.internal.connection_manager import ConnectionManager
@@ -57,3 +58,10 @@ async def websocket_endpoint(websocket: WebSocket, client_id: str, nickname: str
             await manager.broadcast(message)
     except WebSocketDisconnect:
         await manager.disconnect(websocket, client_id)
+
+
+@router.get('/metrics')
+async def get_metrics():
+    """Get real-time system metrics"""
+    metrics = manager.get_metrics()
+    return JSONResponse(content=metrics)

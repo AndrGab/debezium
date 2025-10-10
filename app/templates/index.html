@@ -6,6 +6,7 @@
     <title>🚀 Debezium Real-Time Chat - CDC Learning Project</title>
     <link rel="stylesheet" href="static/styles.css">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 </head>
 <body>
     <!-- Nickname Modal -->
@@ -67,13 +68,29 @@
                     </div>
                 </div>
             </div>
+            
+            <!-- Navigation Tabs -->
+            <nav class="nav-tabs">
+                <div class="nav-tabs-container">
+                    <button class="nav-tab active" onclick="switchTab('messages')">
+                        <i class="fas fa-comments"></i>
+                        <span>Messages</span>
+                    </button>
+                    <button class="nav-tab" onclick="switchTab('dashboard')">
+                        <i class="fas fa-chart-line"></i>
+                        <span>Dashboard</span>
+                    </button>
+                </div>
+            </nav>
         </header>
 
         <!-- Main Chat Area -->
         <main class="chat-main">
-            <div class="chat-container">
-                <!-- Messages Area -->
-                <div class="messages-container">
+            <!-- Messages Tab Content -->
+            <div id="messages-tab" class="tab-content active">
+                <div class="chat-container">
+                    <!-- Messages Area -->
+                    <div class="messages-container">
                     <div class="messages-header">
                         <h3><i class="fas fa-comments"></i> Real-Time CDC Messages</h3>
                         <div class="message-count">
@@ -117,72 +134,213 @@
                         </div>
                     </form>
                 </div>
+                </div>
+
+                <!-- Sidebar -->
+                <aside class="sidebar">
+                    <div class="sidebar-content">
+                        <div class="section">
+                            <h4><i class="fas fa-info-circle"></i> About CDC</h4>
+                            <p>Change Data Capture (CDC) captures database changes in real-time and streams them to connected clients.</p>
+                        </div>
+                        
+                        <div class="section">
+                            <h4><i class="fas fa-cogs"></i> Architecture</h4>
+                            <div class="architecture-flow">
+                                <div class="flow-item">
+                                    <i class="fas fa-database"></i>
+                                    <span>PostgreSQL</span>
+                                </div>
+                                <div class="flow-arrow">→</div>
+                                <div class="flow-item">
+                                    <i class="fas fa-sync"></i>
+                                    <span>Debezium</span>
+                                </div>
+                                <div class="flow-arrow">→</div>
+                                <div class="flow-item">
+                                    <i class="fas fa-stream"></i>
+                                    <span>Kafka</span>
+                                </div>
+                                <div class="flow-arrow">→</div>
+                                <div class="flow-item">
+                                    <i class="fas fa-bolt"></i>
+                                    <span>WebSocket</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="section">
+                            <h4><i class="fas fa-code"></i> Quick Commands</h4>
+                            <div class="commands">
+                                <button class="command-btn" onclick="insertSampleData()">
+                                    <i class="fas fa-plus"></i> Insert Sample Data
+                                </button>
+                                <button class="command-btn" onclick="updateSampleData()">
+                                    <i class="fas fa-edit"></i> Update Data
+                                </button>
+                                <button class="command-btn" onclick="deleteSampleData()">
+                                    <i class="fas fa-trash"></i> Delete Data
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="section">
+                            <h4><i class="fas fa-link"></i> Useful Links</h4>
+                            <div class="links">
+                                <a href="https://debezium.io/" target="_blank">
+                                    <i class="fas fa-external-link-alt"></i> Debezium Docs
+                                </a>
+                                <a href="https://github.com/AndrGab/debezium" target="_blank">
+                                    <i class="fab fa-github"></i> GitHub Repository
+                                </a>
+                                <a href="https://hacktoberfest.digitalocean.com/" target="_blank">
+                                    <i class="fas fa-trophy"></i> Hacktoberfest
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </aside>
             </div>
 
-            <!-- Sidebar -->
-            <aside class="sidebar">
-                <div class="sidebar-content">
-                    <div class="section">
-                        <h4><i class="fas fa-info-circle"></i> About CDC</h4>
-                        <p>Change Data Capture (CDC) captures database changes in real-time and streams them to connected clients.</p>
-                    </div>
-                    
-                    <div class="section">
-                        <h4><i class="fas fa-cogs"></i> Architecture</h4>
-                        <div class="architecture-flow">
-                            <div class="flow-item">
+            <!-- Dashboard Tab Content -->
+            <div id="dashboard-tab" class="tab-content">
+                <div class="dashboard-container">
+                    <!-- Metrics Cards -->
+                    <div class="metrics-grid">
+                        <div class="metric-card">
+                            <div class="metric-icon">
+                                <i class="fas fa-users"></i>
+                            </div>
+                            <div class="metric-content">
+                                <div class="metric-label">Connected Users</div>
+                                <div class="metric-value" id="metric-users">0</div>
+                            </div>
+                        </div>
+
+                        <div class="metric-card">
+                            <div class="metric-icon">
+                                <i class="fas fa-comment"></i>
+                            </div>
+                            <div class="metric-content">
+                                <div class="metric-label">Msg/Min</div>
+                                <div class="metric-value" id="metric-msg-min">0</div>
+                            </div>
+                        </div>
+
+                        <div class="metric-card">
+                            <div class="metric-icon">
                                 <i class="fas fa-database"></i>
-                                <span>PostgreSQL</span>
                             </div>
-                            <div class="flow-arrow">→</div>
-                            <div class="flow-item">
-                                <i class="fas fa-sync"></i>
-                                <span>Debezium</span>
+                            <div class="metric-content">
+                                <div class="metric-label">Kafka Topics</div>
+                                <div class="metric-value" id="metric-topics">128</div>
                             </div>
-                            <div class="flow-arrow">→</div>
-                            <div class="flow-item">
-                                <i class="fas fa-stream"></i>
-                                <span>Kafka</span>
+                        </div>
+
+                        <div class="metric-card">
+                            <div class="metric-icon">
+                                <i class="fas fa-clock"></i>
                             </div>
-                            <div class="flow-arrow">→</div>
-                            <div class="flow-item">
-                                <i class="fas fa-bolt"></i>
-                                <span>WebSocket</span>
+                            <div class="metric-content">
+                                <div class="metric-label">Latency</div>
+                                <div class="metric-value" id="metric-latency">12ms</div>
                             </div>
                         </div>
                     </div>
 
-                    <div class="section">
-                        <h4><i class="fas fa-code"></i> Quick Commands</h4>
-                        <div class="commands">
-                            <button class="command-btn" onclick="insertSampleData()">
-                                <i class="fas fa-plus"></i> Insert Sample Data
-                            </button>
-                            <button class="command-btn" onclick="updateSampleData()">
-                                <i class="fas fa-edit"></i> Update Data
-                            </button>
-                            <button class="command-btn" onclick="deleteSampleData()">
-                                <i class="fas fa-trash"></i> Delete Data
-                            </button>
+                    <!-- Charts Section -->
+                    <div class="charts-container">
+                        <!-- Real-time CDC Activity Chart -->
+                        <div class="chart-card">
+                            <div class="chart-header">
+                                <h3><i class="fas fa-chart-area"></i> Real-time CDC Activity</h3>
+                            </div>
+                            <div class="chart-body">
+                                <canvas id="cdcActivityChart"></canvas>
+                            </div>
+                        </div>
+
+                        <!-- Operation Distribution Chart -->
+                        <div class="chart-card">
+                            <div class="chart-header">
+                                <h3><i class="fas fa-chart-bar"></i> Operation Distribution (Last 24h)</h3>
+                            </div>
+                            <div class="chart-body">
+                                <div class="operation-bars">
+                                    <div class="operation-bar-item">
+                                        <div class="operation-bar-header">
+                                            <span class="operation-label create">CREATE</span>
+                                            <span class="operation-count" id="op-create-count">0</span>
+                                        </div>
+                                        <div class="operation-bar-track">
+                                            <div class="operation-bar-fill create" id="op-create-bar" style="width: 0%"></div>
+                                        </div>
+                                    </div>
+
+                                    <div class="operation-bar-item">
+                                        <div class="operation-bar-header">
+                                            <span class="operation-label update">UPDATE</span>
+                                            <span class="operation-count" id="op-update-count">0</span>
+                                        </div>
+                                        <div class="operation-bar-track">
+                                            <div class="operation-bar-fill update" id="op-update-bar" style="width: 0%"></div>
+                                        </div>
+                                    </div>
+
+                                    <div class="operation-bar-item">
+                                        <div class="operation-bar-header">
+                                            <span class="operation-label delete">DELETE</span>
+                                            <span class="operation-count" id="op-delete-count">0</span>
+                                        </div>
+                                        <div class="operation-bar-track">
+                                            <div class="operation-bar-fill delete" id="op-delete-bar" style="width: 0%"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
 
-                    <div class="section">
-                        <h4><i class="fas fa-link"></i> Useful Links</h4>
-                        <div class="links">
-                            <a href="https://debezium.io/" target="_blank">
-                                <i class="fas fa-external-link-alt"></i> Debezium Docs
-                            </a>
-                            <a href="https://github.com/AndrGab/debezium" target="_blank">
-                                <i class="fab fa-github"></i> GitHub Repository
-                            </a>
-                            <a href="https://hacktoberfest.digitalocean.com/" target="_blank">
-                                <i class="fas fa-trophy"></i> Hacktoberfest
-                            </a>
+                    <!-- Additional Stats -->
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <h4><i class="fas fa-info-circle"></i> System Info</h4>
+                            <div class="stat-items">
+                                <div class="stat-item">
+                                    <span class="stat-label">Total Messages:</span>
+                                    <span class="stat-value" id="stat-total-messages">0</span>
+                                </div>
+                                <div class="stat-item">
+                                    <span class="stat-label">Uptime:</span>
+                                    <span class="stat-value" id="stat-uptime">0m</span>
+                                </div>
+                                <div class="stat-item">
+                                    <span class="stat-label">Active Users:</span>
+                                    <span class="stat-value" id="stat-active-users">-</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="stat-card">
+                            <h4><i class="fas fa-database"></i> CDC Events</h4>
+                            <div class="stat-items">
+                                <div class="stat-item">
+                                    <span class="stat-label">Created:</span>
+                                    <span class="stat-value stat-create" id="stat-create">0</span>
+                                </div>
+                                <div class="stat-item">
+                                    <span class="stat-label">Updated:</span>
+                                    <span class="stat-value stat-update" id="stat-update">0</span>
+                                </div>
+                                <div class="stat-item">
+                                    <span class="stat-label">Deleted:</span>
+                                    <span class="stat-value stat-delete" id="stat-delete">0</span>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
-            </aside>
+            </div>
         </main>
 
         <!-- Footer -->

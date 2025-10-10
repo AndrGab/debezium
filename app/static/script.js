@@ -4,12 +4,15 @@ let ws;
 let messageCount = 0;
 let isConnected = false;
 let currentNickname = null;
+let cdcActivityChart = null;
+let metricsUpdateInterval = null;
 
 // Initialize the application
 document.addEventListener('DOMContentLoaded', function() {
     setupEventListeners();
     showNicknameModal();
     updateConnectionStatus('connecting', 'Waiting for nickname...');
+    initializeDashboard();
 });
 
 // Nickname Modal Functions
@@ -366,3 +369,189 @@ window.deleteSampleData = deleteSampleData;
 window.sendMessage = sendMessage;
 window.submitNickname = submitNickname;
 window.editNickname = editNickname;
+window.switchTab = switchTab;
+
+// ========================================
+// DASHBOARD FUNCTIONALITY
+// ========================================
+
+function switchTab(tabName) {
+    // Update tab buttons
+    const tabs = document.querySelectorAll('.nav-tab');
+    tabs.forEach(tab => {
+        if (tab.textContent.toLowerCase().includes(tabName)) {
+            tab.classList.add('active');
+        } else {
+            tab.classList.remove('active');
+        }
+    });
+    
+    // Update tab content
+    const messagesTab = document.getElementById('messages-tab');
+    const dashboardTab = document.getElementById('dashboard-tab');
+    
+    if (tabName === 'messages') {
+        messagesTab.classList.add('active');
+        dashboardTab.classList.remove('active');
+        
+        // Stop metrics updates when leaving dashboard
+        if (metricsUpdateInterval) {
+            clearInterval(metricsUpdateInterval);
+            metricsUpdateInterval = null;
+        }
+    } else if (tabName === 'dashboard') {
+        messagesTab.classList.remove('active');
+        dashboardTab.classList.add('active');
+        
+        // Start metrics updates when entering dashboard
+        updateMetrics();
+        metricsUpdateInterval = setInterval(updateMetrics, 2000); // Update every 2 seconds
+    }
+}
+
+function initializeDashboard() {
+    // Initialize CDC Activity Chart
+    const ctx = document.getElementById('cdcActivityChart');
+    if (ctx) {
+        cdcActivityChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: [],
+                datasets: [
+                    {
+                        label: 'Create',
+                        data: [],
+                        borderColor: '#10b981',
+                        backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                        tension: 0.4,
+                        fill: true
+                    },
+                    {
+                        label: 'Update',
+                        data: [],
+                        borderColor: '#f59e0b',
+                        backgroundColor: 'rgba(245, 158, 11, 0.1)',
+                        tension: 0.4,
+                        fill: true
+                    },
+                    {
+                        label: 'Delete',
+                        data: [],
+                        borderColor: '#ef4444',
+                        backgroundColor: 'rgba(239, 68, 68, 0.1)',
+                        tension: 0.4,
+                        fill: true
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            stepSize: 1
+                        }
+                    }
+                }
+            }
+        });
+    }
+}
+
+async function updateMetrics() {
+    try {
+        const response = await fetch('/ws/metrics');
+        const metrics = await response.json();
+        
+        // Update metric cards
+        document.getElementById('metric-users').textContent = metrics.connected_users;
+        document.getElementById('metric-msg-min').textContent = metrics.messages_per_minute;
+        
+        // Update operation distribution with percentage-based fill
+        const total24h = metrics.events_24h.create + metrics.events_24h.update + metrics.events_24h.delete;
+        
+        if (total24h > 0) {
+            // Calculate percentage of total operations
+            const createPercent = (metrics.events_24h.create / total24h) * 100;
+            const updatePercent = (metrics.events_24h.update / total24h) * 100;
+            const deletePercent = (metrics.events_24h.delete / total24h) * 100;
+            
+            document.getElementById('op-create-bar').style.width = createPercent + '%';
+            document.getElementById('op-update-bar').style.width = updatePercent + '%';
+            document.getElementById('op-delete-bar').style.width = deletePercent + '%';
+        } else {
+            document.getElementById('op-create-bar').style.width = '0%';
+            document.getElementById('op-update-bar').style.width = '0%';
+            document.getElementById('op-delete-bar').style.width = '0%';
+        }
+        
+        document.getElementById('op-create-count').textContent = metrics.events_24h.create;
+        document.getElementById('op-update-count').textContent = metrics.events_24h.update;
+        document.getElementById('op-delete-count').textContent = metrics.events_24h.delete;
+        
+        // Update stats
+        document.getElementById('stat-total-messages').textContent = metrics.total_messages;
+        document.getElementById('stat-uptime').textContent = formatUptime(metrics.uptime_seconds);
+        
+        // Show count instead of names to avoid overflow
+        const activeUsersCount = metrics.active_nicknames.length;
+        const activeUsersText = activeUsersCount > 0 
+            ? `${activeUsersCount} user${activeUsersCount !== 1 ? 's' : ''} online`
+            : 'No users';
+        document.getElementById('stat-active-users').textContent = activeUsersText;
+        document.getElementById('stat-active-users').title = metrics.active_nicknames.join(', ') || 'None';
+        
+        document.getElementById('stat-create').textContent = metrics.cdc_events.create;
+        document.getElementById('stat-update').textContent = metrics.cdc_events.update;
+        document.getElementById('stat-delete').textContent = metrics.cdc_events.delete;
+        
+        // Update CDC Activity Chart
+        updateCDCChart(metrics.cdc_events);
+        
+    } catch (error) {
+        console.error('Failed to fetch metrics:', error);
+    }
+}
+
+function updateCDCChart(cdcEvents) {
+    if (!cdcActivityChart) return;
+    
+    const now = new Date().toLocaleTimeString();
+    
+    // Keep last 20 data points
+    if (cdcActivityChart.data.labels.length > 20) {
+        cdcActivityChart.data.labels.shift();
+        cdcActivityChart.data.datasets.forEach(dataset => {
+            dataset.data.shift();
+        });
+    }
+    
+    cdcActivityChart.data.labels.push(now);
+    cdcActivityChart.data.datasets[0].data.push(cdcEvents.create);
+    cdcActivityChart.data.datasets[1].data.push(cdcEvents.update);
+    cdcActivityChart.data.datasets[2].data.push(cdcEvents.delete);
+    
+    cdcActivityChart.update('none'); // Update without animation for smoother real-time updates
+}
+
+function formatUptime(seconds) {
+    const days = Math.floor(seconds / 86400);
+    const hours = Math.floor((seconds % 86400) / 3600);
+    const minutes = Math.floor((seconds % 3600) / 60);
+    
+    if (days > 0) {
+        return `${days}d ${hours}h`;
+    } else if (hours > 0) {
+        return `${hours}h ${minutes}m`;
+    } else {
+        return `${minutes}m`;
+    }
+}
+
