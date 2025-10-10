@@ -475,6 +475,21 @@ async function updateMetrics() {
         document.getElementById('metric-msg-min').textContent = metrics.messages_per_minute;
         document.getElementById('metric-topics').textContent = metrics.kafka_topics || 0;
         
+        // Update throughput metrics
+        document.getElementById('metric-cdc-rate').textContent = metrics.cdc_events_per_sec || 0;
+        
+        // Format bytes per second with units
+        const bytesPerSec = metrics.bytes_per_sec || 0;
+        let formattedBytes;
+        if (bytesPerSec < 1024) {
+            formattedBytes = bytesPerSec.toFixed(0) + ' B/s';
+        } else if (bytesPerSec < 1024 * 1024) {
+            formattedBytes = (bytesPerSec / 1024).toFixed(2) + ' KB/s';
+        } else {
+            formattedBytes = (bytesPerSec / (1024 * 1024)).toFixed(2) + ' MB/s';
+        }
+        document.getElementById('metric-bytes-rate').textContent = formattedBytes;
+        
         // Update operation distribution with percentage-based fill
         const total24h = metrics.events_24h.create + metrics.events_24h.update + metrics.events_24h.delete;
         

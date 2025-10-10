@@ -30,6 +30,10 @@ class ConnectionManager(metaclass=SingletonMeta):
         self.start_time = time.time()
         self.kafka_topics_count = 0  # Track Kafka topics count
         self.kafka_bootstrap_servers = 'kafka-debezium:9092'  # Default Kafka server
+        
+        # Throughput tracking
+        self.cdc_event_timestamps = deque(maxlen=1000)  # CDC events with timestamps for events/sec
+        self.bytes_transferred = deque(maxlen=1000)  # Bytes with timestamps for bytes/sec tracking
 
     async def connect(self, websocket: WebSocket, client_id: str, nickname: str = None):
         await websocket.accept()
@@ -58,19 +62,32 @@ class ConnectionManager(metaclass=SingletonMeta):
         self.message_timestamps.append(current_time)
         self.total_messages += 1
         
+        # Track bytes transferred (message size in bytes)
+        message_bytes = len(message.encode('utf-8'))
+        self.bytes_transferred.append({'bytes': message_bytes, 'timestamp': current_time})
+        
         # Track CDC events
+        is_cdc_event = False
         if '[Created]' in message or 'Created' in message:
             self.cdc_events['create'] += 1
             self.cdc_events_24h.append({'type': 'create', 'timestamp': current_time})
+            self.cdc_event_timestamps.append(current_time)
+            is_cdc_event = True
         elif '[Updated]' in message or 'Updated' in message:
             self.cdc_events['update'] += 1
             self.cdc_events_24h.append({'type': 'update', 'timestamp': current_time})
+            self.cdc_event_timestamps.append(current_time)
+            is_cdc_event = True
         elif '[Deleted]' in message or 'Deleted' in message:
             self.cdc_events['delete'] += 1
             self.cdc_events_24h.append({'type': 'delete', 'timestamp': current_time})
+            self.cdc_event_timestamps.append(current_time)
+            is_cdc_event = True
         elif '[Snapshot]' in message or 'Snapshot' in message:
             self.cdc_events['snapshot'] += 1
             self.cdc_events_24h.append({'type': 'snapshot', 'timestamp': current_time})
+            self.cdc_event_timestamps.append(current_time)
+            is_cdc_event = True
         
         for connection in self.active_connections:
             await connection.send_text(message)
@@ -110,6 +127,17 @@ class ConnectionManager(metaclass=SingletonMeta):
         one_minute_ago = current_time - 60
         recent_messages = sum(1 for ts in self.message_timestamps if ts >= one_minute_ago)
         
+        # Calculate CDC events per second (last 60 seconds)
+        cdc_events_last_minute = sum(1 for ts in self.cdc_event_timestamps if ts >= one_minute_ago)
+        cdc_events_per_sec = round(cdc_events_last_minute / 60, 2) if cdc_events_last_minute > 0 else 0
+        
+        # Calculate bytes per second (last 60 seconds)
+        bytes_last_minute = sum(
+            item['bytes'] for item in self.bytes_transferred 
+            if item['timestamp'] >= one_minute_ago
+        )
+        bytes_per_sec = round(bytes_last_minute / 60, 2) if bytes_last_minute > 0 else 0
+        
         # Calculate events in last 24 hours by type
         twenty_four_hours_ago = current_time - (24 * 60 * 60)
         events_24h = [e for e in self.cdc_events_24h if e['timestamp'] >= twenty_four_hours_ago]
@@ -132,5 +160,7 @@ class ConnectionManager(metaclass=SingletonMeta):
             'events_24h': events_24h_by_type,
             'uptime_seconds': uptime_seconds,
             'active_nicknames': list(self.nicknames.values()),
-            'kafka_topics': self.kafka_topics_count
+            'kafka_topics': self.kafka_topics_count,
+            'cdc_events_per_sec': cdc_events_per_sec,
+            'bytes_per_sec': bytes_per_sec
         }
