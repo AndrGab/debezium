@@ -205,37 +205,27 @@ function handleIncomingMessage(messageData) {
 }
 
 // Create message element
-    function createMessageElement(messageData) {
+function createMessageElement(messageData) {
     const messageDiv = document.createElement("div");
-    messageDiv.className = "message"; // unified style with fade-in animation
+    messageDiv.className = "message-item";
 
     // Determine message type and label
-    let type = 'cdc';
-    if (messageData.includes("Created")) type = 'insert';
-    else if (messageData.includes("Updated")) type = 'update';
-    else if (messageData.includes("Deleted")) type = 'delete';
-
-    messageDiv.classList.add(type);
-
-    // Message content
-    const contentSpan = document.createElement("span");
-    contentSpan.textContent = messageData;
-
-    // Timestamp
-    const timeDiv = document.createElement("div");
-    timeDiv.className = "time";
-    timeDiv.textContent = new Date().toLocaleTimeString([], {
-        hour: '2-digit',
-        minute: '2-digit'
-    });
-
-    // Combine
-    messageDiv.appendChild(contentSpan);
-    messageDiv.appendChild(timeDiv);
-
-    return messageDiv;
-}
+    let messageType = 'cdc';
+    let typeLabel = 'CDC EVENT';
     
+    if (messageData.includes("Created") || messageData.includes("INSERT")) {
+        messageType = 'create';
+        typeLabel = 'CREATE';
+    } else if (messageData.includes("Updated") || messageData.includes("UPDATE")) {
+        messageType = 'update';
+        typeLabel = 'UPDATE';
+    } else if (messageData.includes("Deleted") || messageData.includes("DELETE")) {
+        messageType = 'delete';
+        typeLabel = 'DELETE';
+    }
+
+    messageDiv.classList.add(messageType);
+
     // Create message content
     const contentDiv = document.createElement("div");
     contentDiv.className = "message-content";
