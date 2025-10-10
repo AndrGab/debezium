@@ -36,10 +36,8 @@ body {
     display: flex;
     flex-direction: column;
     min-height: 100vh;
-    max-width: 1400px;
-    margin: 0 auto;
+    width: 100%;
     background: var(--surface);
-    box-shadow: var(--shadow-lg);
 }
 
 /* Header */
@@ -53,8 +51,7 @@ body {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    max-width: 1200px;
-    margin: 0 auto;
+    width: 100%;
     padding: 1rem 2rem;
 }
 
@@ -124,12 +121,10 @@ body {
 }
 
 .nav-tabs-container {
-    max-width: 1200px;
-    margin: 0 auto;
+    width: 100%;
     padding: 0 2rem;
     display: flex;
     gap: 0.5rem;
-    width: 100%;
 }
 
 .nav-tab {
@@ -350,8 +345,7 @@ body {
 }
 
 .message-form {
-    max-width: 800px;
-    margin: 0 auto;
+    width: 100%;
 }
 
 .input-group {
@@ -534,8 +528,8 @@ body {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    max-width: 1200px;
-    margin: 0 auto;
+    width: 100%;
+    padding: 0 2rem;
     font-size: 0.875rem;
     color: var(--text-secondary);
 }
@@ -543,14 +537,9 @@ body {
 /* Responsive Design */
 /* Large tablets and small desktops (1024px and below) */
 @media (max-width: 1024px) {
-    .app-container {
-        max-width: 100%;
-    }
-    
     .header-content,
     .nav-tabs-container,
     .footer-content {
-        max-width: 100%;
         padding: 1rem 1.5rem;
     }
     
