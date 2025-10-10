@@ -125,10 +125,7 @@ class ConnectionManager(metaclass=SingletonMeta):
         cdc_events_per_sec = round(cdc_events_last_minute / 60, 2) if cdc_events_last_minute > 0 else 0
 
         # Calculate bytes per second (last 60 seconds)
-        bytes_last_minute = sum(
-            item['bytes'] for item in self.bytes_transferred
-            if item['timestamp'] >= one_minute_ago
-        )
+        bytes_last_minute = sum(item['bytes'] for item in self.bytes_transferred if item['timestamp'] >= one_minute_ago)
         bytes_per_sec = round(bytes_last_minute / 60, 2) if bytes_last_minute > 0 else 0
 
         # Calculate events in last 24 hours by type
@@ -139,7 +136,7 @@ class ConnectionManager(metaclass=SingletonMeta):
             'create': sum(1 for e in events_24h if e['type'] == 'create'),
             'update': sum(1 for e in events_24h if e['type'] == 'update'),
             'delete': sum(1 for e in events_24h if e['type'] == 'delete'),
-            'snapshot': sum(1 for e in events_24h if e['type'] == 'snapshot')
+            'snapshot': sum(1 for e in events_24h if e['type'] == 'snapshot'),
         }
 
         # Calculate uptime
@@ -155,5 +152,5 @@ class ConnectionManager(metaclass=SingletonMeta):
             'active_nicknames': list(self.nicknames.values()),
             'kafka_topics': self.kafka_topics_count,
             'cdc_events_per_sec': cdc_events_per_sec,
-            'bytes_per_sec': bytes_per_sec
+            'bytes_per_sec': bytes_per_sec,
         }
