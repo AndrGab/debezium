@@ -63,5 +63,7 @@ async def websocket_endpoint(websocket: WebSocket, client_id: str, nickname: str
 @router.get('/metrics')
 async def get_metrics():
     """Get real-time system metrics"""
+    # Fetch Kafka topics count (async call)
+    await manager.fetch_kafka_topics_count()
     metrics = manager.get_metrics()
     return JSONResponse(content=metrics)

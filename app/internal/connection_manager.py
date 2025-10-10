@@ -3,6 +3,8 @@ from collections import deque
 from datetime import datetime
 
 from fastapi import WebSocket
+from aiokafka.admin import AIOKafkaAdminClient
+import asyncio
 
 
 class SingletonMeta(type):
@@ -26,6 +28,8 @@ class ConnectionManager(metaclass=SingletonMeta):
         self.cdc_events_24h = deque(maxlen=10000)  # Store events with timestamps for 24h tracking
         self.total_messages = 0
         self.start_time = time.time()
+        self.kafka_topics_count = 0  # Track Kafka topics count
+        self.kafka_bootstrap_servers = 'kafka-debezium:9092'  # Default Kafka server
 
     async def connect(self, websocket: WebSocket, client_id: str, nickname: str = None):
         await websocket.accept()
@@ -79,6 +83,25 @@ class ConnectionManager(metaclass=SingletonMeta):
         """Get nickname for a websocket connection"""
         return self.nicknames.get(websocket, 'Anonymous')
     
+    async def fetch_kafka_topics_count(self) -> int:
+        """Fetch the current count of Kafka topics"""
+        try:
+            admin_client = AIOKafkaAdminClient(bootstrap_servers=self.kafka_bootstrap_servers)
+            await admin_client.start()
+            try:
+                # Get list of all topics
+                topics = await admin_client.list_topics()
+                # Filter out internal topics (those starting with __)
+                user_topics = [topic for topic in topics if not topic.startswith('__')]
+                self.kafka_topics_count = len(user_topics)
+                return self.kafka_topics_count
+            finally:
+                await admin_client.close()
+        except Exception as e:
+            print(f"Error fetching Kafka topics: {e}")
+            # Return cached value or 0 if never fetched
+            return self.kafka_topics_count
+    
     def get_metrics(self) -> dict:
         """Get current system metrics"""
         current_time = time.time()
@@ -108,5 +131,6 @@ class ConnectionManager(metaclass=SingletonMeta):
             'cdc_events': self.cdc_events,
             'events_24h': events_24h_by_type,
             'uptime_seconds': uptime_seconds,
-            'active_nicknames': list(self.nicknames.values())
+            'active_nicknames': list(self.nicknames.values()),
+            'kafka_topics': self.kafka_topics_count
         }

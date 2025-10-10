@@ -473,6 +473,7 @@ async function updateMetrics() {
         // Update metric cards
         document.getElementById('metric-users').textContent = metrics.connected_users;
         document.getElementById('metric-msg-min').textContent = metrics.messages_per_minute;
+        document.getElementById('metric-topics').textContent = metrics.kafka_topics || 0;
         
         // Update operation distribution with percentage-based fill
         const total24h = metrics.events_24h.create + metrics.events_24h.update + metrics.events_24h.delete;
