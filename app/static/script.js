@@ -328,7 +328,7 @@ function insertSampleData() {
     ];
     
     const randomQuery = sampleQueries[Math.floor(Math.random() * sampleQueries.length)];
-    addSystemMessage(`Try this SQL command: ${randomQuery}`);
+    addSystemMessage(`📝 Execute this SQL in your database to test CDC: ${randomQuery}`);
 }
 
 function updateSampleData() {
@@ -339,7 +339,7 @@ function updateSampleData() {
     ];
     
     const randomQuery = sampleQueries[Math.floor(Math.random() * sampleQueries.length)];
-    addSystemMessage(`Try this SQL command: ${randomQuery}`);
+    addSystemMessage(`📝 Execute this SQL in your database to test CDC: ${randomQuery}`);
 }
 
 function deleteSampleData() {
@@ -350,7 +350,7 @@ function deleteSampleData() {
     ];
     
     const randomQuery = sampleQueries[Math.floor(Math.random() * sampleQueries.length)];
-    addSystemMessage(`Try this SQL command: ${randomQuery}`);
+    addSystemMessage(`📝 Execute this SQL in your database to test CDC: ${randomQuery}`);
 }
 
 // Utility functions
