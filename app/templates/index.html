@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>🚀 Debezium Real-Time Chat - CDC Learning Project</title>
-    <link rel="stylesheet" href="static/styles.css">
+    <link rel="stylesheet" href="static/styles.css?v=2">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 </head>
@@ -177,17 +177,251 @@
                         </div>
 
                         <div class="section">
-                            <h4><i class="fas fa-code"></i> Quick Commands</h4>
+                            <h4><i class="fas fa-code"></i> CDC Playground</h4>
                             <div class="commands">
-                                <button class="command-btn" onclick="insertSampleData()">
-                                    <i class="fas fa-plus"></i> Insert Sample Data
-                                </button>
-                                <button class="command-btn" onclick="updateSampleData()">
-                                    <i class="fas fa-edit"></i> Update Data
-                                </button>
-                                <button class="command-btn" onclick="deleteSampleData()">
-                                    <i class="fas fa-trash"></i> Delete Data
-                                </button>
+                                <div class="command-section open">
+                                    <button class="command-toggle" type="button" aria-expanded="true">
+                                        <span class="toggle-icon">›</span>
+                                        <i class="fas fa-plus"></i>
+                                        <span class="toggle-label">Create</span>
+                                    </button>
+                                    <div class="command-list">
+                                        <div class="command-row">
+                                            <button class="command-btn" onclick="insertSampleData('storm')">
+                                                <i class="fas fa-user-plus"></i>
+                                                <span>Insert Storm</span>
+                                            </button>
+                                            <button class="copy-btn" onclick="copySQL(event, 'insert', 'storm')" title="Copy SQL">
+                                                <i class="fas fa-copy"></i>
+                                            </button>
+                                        </div>
+                                        <div class="command-row">
+                                            <button class="command-btn" onclick="insertSampleData('dr_strange')">
+                                                <i class="fas fa-user-plus"></i>
+                                                <span>Insert Doctor Strange</span>
+                                            </button>
+                                            <button class="copy-btn" onclick="copySQL(event, 'insert', 'dr_strange')" title="Copy SQL">
+                                                <i class="fas fa-copy"></i>
+                                            </button>
+                                        </div>
+                                        <div class="command-row">
+                                            <button class="command-btn" onclick="insertSampleData('black_panther')">
+                                                <i class="fas fa-user-plus"></i>
+                                                <span>Insert Black Panther</span>
+                                            </button>
+                                            <button class="copy-btn" onclick="copySQL(event, 'insert', 'black_panther')" title="Copy SQL">
+                                                <i class="fas fa-copy"></i>
+                                            </button>
+                                        </div>
+                                        <div class="command-row">
+                                            <button class="command-btn" onclick="insertSampleData('captain_marvel')">
+                                                <i class="fas fa-user-plus"></i>
+                                                <span>Insert Captain Marvel</span>
+                                            </button>
+                                            <button class="copy-btn" onclick="copySQL(event, 'insert', 'captain_marvel')" title="Copy SQL">
+                                                <i class="fas fa-copy"></i>
+                                            </button>
+                                        </div>
+                                        <div class="command-row">
+                                            <button class="command-btn" onclick="insertSampleData('green_lantern')">
+                                                <i class="fas fa-user-plus"></i>
+                                                <span>Insert Green Lantern</span>
+                                            </button>
+                                            <button class="copy-btn" onclick="copySQL(event, 'insert', 'green_lantern')" title="Copy SQL">
+                                                <i class="fas fa-copy"></i>
+                                            </button>
+                                        </div>
+                                        <div class="command-row command-row-single">
+                                            <button class="command-btn command-btn-alt" onclick="insertSampleData()">
+                                                <i class="fas fa-random"></i>
+                                                <span>Random Insert</span>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="command-section">
+                                    <button class="command-toggle" type="button" aria-expanded="false">
+                                        <span class="toggle-icon">›</span>
+                                        <i class="fas fa-pen"></i>
+                                        <span class="toggle-label">Update</span>
+                                    </button>
+                                    <div class="command-list">
+                                        <div class="command-row">
+                                            <button class="command-btn" onclick="updateSampleData('storm_powers')">
+                                                <i class="fas fa-edit"></i>
+                                                <span>Boost Storm</span>
+                                            </button>
+                                            <button class="copy-btn" onclick="copySQL(event, 'update', 'storm_powers')" title="Copy SQL">
+                                                <i class="fas fa-copy"></i>
+                                            </button>
+                                        </div>
+                                        <div class="command-row">
+                                            <button class="command-btn" onclick="updateSampleData('spider_identity')">
+                                                <i class="fas fa-edit"></i>
+                                                <span>Swap Spider Identity</span>
+                                            </button>
+                                            <button class="copy-btn" onclick="copySQL(event, 'update', 'spider_identity')" title="Copy SQL">
+                                                <i class="fas fa-copy"></i>
+                                            </button>
+                                        </div>
+                                        <div class="command-row">
+                                            <button class="command-btn" onclick="updateSampleData('batman_kit')">
+                                                <i class="fas fa-edit"></i>
+                                                <span>Upgrade Batman</span>
+                                            </button>
+                                            <button class="copy-btn" onclick="copySQL(event, 'update', 'batman_kit')" title="Copy SQL">
+                                                <i class="fas fa-copy"></i>
+                                            </button>
+                                        </div>
+                                        <div class="command-row">
+                                            <button class="command-btn" onclick="updateSampleData('marvel_energy')">
+                                                <i class="fas fa-edit"></i>
+                                                <span>Amplify Captain Marvel</span>
+                                            </button>
+                                            <button class="copy-btn" onclick="copySQL(event, 'update', 'marvel_energy')" title="Copy SQL">
+                                                <i class="fas fa-copy"></i>
+                                            </button>
+                                        </div>
+                                        <div class="command-row">
+                                            <button class="command-btn" onclick="updateSampleData('lighting_team')">
+                                                <i class="fas fa-edit"></i>
+                                                <span>Tag Black Panther</span>
+                                            </button>
+                                            <button class="copy-btn" onclick="copySQL(event, 'update', 'lighting_team')" title="Copy SQL">
+                                                <i class="fas fa-copy"></i>
+                                            </button>
+                                        </div>
+                                        <div class="command-row command-row-single">
+                                            <button class="command-btn command-btn-alt" onclick="updateSampleData()">
+                                                <i class="fas fa-random"></i>
+                                                <span>Random Update</span>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="command-section">
+                                    <button class="command-toggle" type="button" aria-expanded="false">
+                                        <span class="toggle-icon">›</span>
+                                        <i class="fas fa-trash"></i>
+                                        <span class="toggle-label">Delete</span>
+                                    </button>
+                                    <div class="command-list">
+                                        <div class="command-row">
+                                            <button class="command-btn" onclick="deleteSampleData('retire_batman')">
+                                                <i class="fas fa-trash"></i>
+                                                <span>Retire Batman</span>
+                                            </button>
+                                            <button class="copy-btn" onclick="copySQL(event, 'delete', 'retire_batman')" title="Copy SQL">
+                                                <i class="fas fa-copy"></i>
+                                            </button>
+                                        </div>
+                                        <div class="command-row">
+                                            <button class="command-btn" onclick="deleteSampleData('retire_magic')">
+                                                <i class="fas fa-trash"></i>
+                                                <span>Remove Sorcerers</span>
+                                            </button>
+                                            <button class="copy-btn" onclick="copySQL(event, 'delete', 'retire_magic')" title="Copy SQL">
+                                                <i class="fas fa-copy"></i>
+                                            </button>
+                                        </div>
+                                        <div class="command-row">
+                                            <button class="command-btn" onclick="deleteSampleData('retire_secret')">
+                                                <i class="fas fa-trash"></i>
+                                                <span>Clear Famous Identities</span>
+                                            </button>
+                                            <button class="copy-btn" onclick="copySQL(event, 'delete', 'retire_secret')" title="Copy SQL">
+                                                <i class="fas fa-copy"></i>
+                                            </button>
+                                        </div>
+                                        <div class="command-row">
+                                            <button class="command-btn" onclick="deleteSampleData('retire_duplicates')">
+                                                <i class="fas fa-trash"></i>
+                                                <span>Remove Duplicate Fliers</span>
+                                            </button>
+                                            <button class="copy-btn" onclick="copySQL(event, 'delete', 'retire_duplicates')" title="Copy SQL">
+                                                <i class="fas fa-copy"></i>
+                                            </button>
+                                        </div>
+                                        <div class="command-row">
+                                            <button class="command-btn" onclick="deleteSampleData('retire_low_power')">
+                                                <i class="fas fa-trash"></i>
+                                                <span>Drop Low Power Heroes</span>
+                                            </button>
+                                            <button class="copy-btn" onclick="copySQL(event, 'delete', 'retire_low_power')" title="Copy SQL">
+                                                <i class="fas fa-copy"></i>
+                                            </button>
+                                        </div>
+                                        <div class="command-row command-row-single">
+                                            <button class="command-btn command-btn-alt" onclick="deleteSampleData()">
+                                                <i class="fas fa-random"></i>
+                                                <span>Random Delete</span>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="command-section">
+                                    <button class="command-toggle" type="button" aria-expanded="false">
+                                        <span class="toggle-icon">›</span>
+                                        <i class="fas fa-search"></i>
+                                        <span class="toggle-label">Select</span>
+                                    </button>
+                                    <div class="command-list">
+                                        <div class="command-row">
+                                            <button class="command-btn" onclick="selectSampleData('list_all')">
+                                                <i class="fas fa-search"></i>
+                                                <span>List All Heroes</span>
+                                            </button>
+                                            <button class="copy-btn" onclick="copySQL(event, 'select', 'list_all')" title="Copy SQL">
+                                                <i class="fas fa-copy"></i>
+                                            </button>
+                                        </div>
+                                        <div class="command-row">
+                                            <button class="command-btn" onclick="selectSampleData('flight_team')">
+                                                <i class="fas fa-search"></i>
+                                                <span>Search Flyers</span>
+                                            </button>
+                                            <button class="copy-btn" onclick="copySQL(event, 'select', 'flight_team')" title="Copy SQL">
+                                                <i class="fas fa-copy"></i>
+                                            </button>
+                                        </div>
+                                        <div class="command-row">
+                                            <button class="command-btn" onclick="selectSampleData('power_combo')">
+                                                <i class="fas fa-search"></i>
+                                                <span>Stacked Powers</span>
+                                            </button>
+                                            <button class="copy-btn" onclick="copySQL(event, 'select', 'power_combo')" title="Copy SQL">
+                                                <i class="fas fa-copy"></i>
+                                            </button>
+                                        </div>
+                                        <div class="command-row">
+                                            <button class="command-btn" onclick="selectSampleData('count_total')">
+                                                <i class="fas fa-search"></i>
+                                                <span>Count Heroes</span>
+                                            </button>
+                                            <button class="copy-btn" onclick="copySQL(event, 'select', 'count_total')" title="Copy SQL">
+                                                <i class="fas fa-copy"></i>
+                                            </button>
+                                        </div>
+                                        <div class="command-row">
+                                            <button class="command-btn" onclick="selectSampleData('secret_watch')">
+                                                <i class="fas fa-search"></i>
+                                                <span>Secret Identity Watch</span>
+                                            </button>
+                                            <button class="copy-btn" onclick="copySQL(event, 'select', 'secret_watch')" title="Copy SQL">
+                                                <i class="fas fa-copy"></i>
+                                            </button>
+                                        </div>
+                                        <div class="command-row command-row-single">
+                                            <button class="command-btn command-btn-alt" onclick="selectSampleData()">
+                                                <i class="fas fa-random"></i>
+                                                <span>Random Select</span>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
 
@@ -383,6 +617,6 @@
         </footer>
     </div>
  
-    <script src="static/script.js"></script>
+    <script src="static/script.js?v=2"></script>
 </body>
 </html>

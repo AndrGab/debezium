@@ -520,7 +520,87 @@ body {
 .commands {
     display: flex;
     flex-direction: column;
+    gap: 0.75rem;
+}
+
+
+.command-section {
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    background: var(--surface);
+    transition: border-color 0.2s ease;
+    margin-bottom: 0.75rem;
+    box-sizing: border-box;
+}
+
+.command-section.open {
+    border-color: var(--primary-color);
+}
+
+.command-toggle {
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+    width: 100%;
+    padding: 0.75rem 1rem;
+    background: none;
+    border: none;
+    color: var(--text-primary);
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    text-align: left;
+}
+
+.command-toggle:hover,
+.command-toggle:focus-visible {
+    background: var(--background);
+}
+
+.command-toggle i {
+    color: var(--primary-color);
+}
+
+.command-toggle .toggle-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 1rem;
+    font-size: 1.25rem;
+    color: var(--text-secondary);
+    transition: transform 0.25s ease;
+}
+
+.command-section.open .command-toggle .toggle-icon {
+    transform: rotate(90deg);
+}
+
+
+.command-list {
+    display: flex;
+    flex-direction: column;
     gap: 0.5rem;
+    padding: 0 1rem;
+    max-height: 0;
+    opacity: 0;
+    overflow: hidden;
+    transition: max-height 0.4s cubic-bezier(.4,0,.2,1), opacity 0.3s ease, padding-top 0.4s, padding-bottom 0.4s;
+    box-sizing: border-box;
+}
+
+.command-section.open .command-list {
+    opacity: 1;
+    max-height: 2000px;
+    padding-top: 0.75rem;
+    padding-bottom: 0.75rem;
+}
+
+
+.command-row {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.25rem;
 }
 
 .command-btn {
@@ -533,15 +613,61 @@ body {
     border-radius: var(--radius);
     font-size: 0.875rem;
     cursor: pointer;
-    transition: all 0.2s;
+    transition: all 0.2s ease;
     text-align: left;
     color: var(--text-primary);
+    flex: 1;
 }
 
 .command-btn:hover {
     background: var(--primary-color);
     color: white;
     transform: translateY(-1px);
+}
+
+.command-btn-alt {
+    background: transparent;
+    border-style: dashed;
+    color: var(--primary-color);
+}
+
+.command-btn-alt:hover {
+    background: var(--primary-color);
+    color: white;
+    border-color: transparent;
+}
+
+.command-row-single {
+    justify-content: flex-start;
+}
+
+.command-row-single .command-btn {
+    width: 100%;
+}
+
+.copy-btn {
+    width: 2.25rem;
+    height: 2.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.copy-btn:hover {
+    background: var(--primary-color);
+    color: white;
+}
+
+.copy-btn.copied {
+    background: var(--success-color);
+    color: white;
+    border-color: transparent;
 }
 
 .links {

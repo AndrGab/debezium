@@ -6,6 +6,79 @@ let isConnected = false;
 let currentNickname = null;
 let cdcActivityChart = null;
 let metricsUpdateInterval = null;
+let commandListResizeTimer = null;
+
+// Curated SQL examples grouped by operation type for the sidebar helpers
+const SQL_EXAMPLES = {
+    insert: {
+        storm: {
+            sql: "INSERT INTO super_heroes (name, secret_identity, powers) VALUES ('Storm', 'Ororo Munroe', 'weather manipulation, lightning, flight');"
+        },
+        dr_strange: {
+            sql: "INSERT INTO super_heroes (name, secret_identity, powers) VALUES ('Doctor Strange', 'Stephen Strange', 'sorcery, astral projection, time manipulation');"
+        },
+        black_panther: {
+            sql: "INSERT INTO super_heroes (name, secret_identity, powers) VALUES ('Black Panther', 'T\'Challa', 'vibranium suit, enhanced agility, tactical genius');"
+        },
+        captain_marvel: {
+            sql: "INSERT INTO super_heroes (name, secret_identity, powers) VALUES ('Captain Marvel', 'Carol Danvers', 'cosmic energy, flight, photon blasts');"
+        },
+        green_lantern: {
+            sql: "INSERT INTO super_heroes (name, secret_identity, powers) VALUES ('Green Lantern', 'Hal Jordan', 'power ring constructs, flight, protective aura');"
+        }
+    },
+    update: {
+        storm_powers: {
+            sql: "UPDATE super_heroes SET powers = 'omega-level weather control, flight, tactical leadership' WHERE name = 'Storm';"
+        },
+        spider_identity: {
+            sql: "UPDATE super_heroes SET secret_identity = 'Gwen Stacy' WHERE name = 'Spider-Woman';"
+        },
+        batman_kit: {
+            sql: "UPDATE super_heroes SET powers = 'detective genius, stealth tech, tactical gadgets' WHERE name = 'Batman';"
+        },
+        marvel_energy: {
+            sql: "UPDATE super_heroes SET powers = 'binary form, cosmic awareness, photon energy overload' WHERE name = 'Captain Marvel';"
+        },
+        lighting_team: {
+            sql: "UPDATE super_heroes SET powers = powers || ', team strategist' WHERE name = 'Black Panther';"
+        }
+    },
+    delete: {
+        retire_batman: {
+            sql: "DELETE FROM super_heroes WHERE name = 'Batman';"
+        },
+        retire_magic: {
+            sql: "DELETE FROM super_heroes WHERE powers ILIKE '%sorcery%';"
+        },
+        retire_secret: {
+            sql: "DELETE FROM super_heroes WHERE secret_identity IN ('Bruce Wayne', 'Tony Stark');"
+        },
+        retire_duplicates: {
+            sql: "DELETE FROM super_heroes WHERE name IN ('Storm', 'Doctor Strange') AND powers ILIKE '%flight%';"
+        },
+        retire_low_power: {
+            sql: "DELETE FROM super_heroes WHERE powers ILIKE '%acrobatics%' AND powers NOT ILIKE '%strength%';"
+        }
+    },
+    select: {
+        list_all: {
+            sql: "SELECT name, secret_identity, powers FROM super_heroes ORDER BY name;"
+        },
+        flight_team: {
+            sql: "SELECT name, powers FROM super_heroes WHERE powers ILIKE '%flight%' ORDER BY name;"
+        },
+        power_combo: {
+            sql: "SELECT name, powers FROM super_heroes WHERE powers ILIKE '%flight%' AND powers ILIKE '%strength%';"
+        },
+        count_total: {
+            sql: "SELECT COUNT(*) AS total_heroes FROM super_heroes;"
+        },
+        secret_watch: {
+            sql: "SELECT secret_identity, name FROM super_heroes WHERE secret_identity IS NOT NULL ORDER BY secret_identity;"
+        }
+    }
+};
 
 // Initialize the application
 document.addEventListener('DOMContentLoaded', function() {
@@ -29,6 +102,7 @@ document.addEventListener('DOMContentLoaded', function() {
         applyTheme(newTheme);
     });
     setupEventListeners();
+    initializeCommandDropdowns();
     showNicknameModal();
     updateConnectionStatus('connecting', 'Waiting for nickname...');
     initializeDashboard();
@@ -198,6 +272,33 @@ function setupEventListeners() {
     });
 }
 
+function initializeCommandDropdowns() {
+    const sections = document.querySelectorAll('.command-section');
+
+    sections.forEach(section => {
+        const toggle = section.querySelector('.command-toggle');
+        const list = section.querySelector('.command-list');
+
+        if (!toggle || !list) {
+            return;
+        }
+
+        const isInitiallyOpen = section.classList.contains('open');
+        toggle.setAttribute('aria-expanded', isInitiallyOpen ? 'true' : 'false');
+
+        toggle.addEventListener('click', () => {
+            const isOpen = section.classList.toggle('open');
+            toggle.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+        });
+    });
+
+    window.addEventListener('resize', handleCommandSectionResize, { passive: true });
+}
+
+function handleCommandSectionResize() {
+    // No longer needed with CSS-based height transition
+}
+
 // Connection status management
 function updateConnectionStatus(status, text) {
     const statusIndicator = document.getElementById("connection-status");
@@ -339,37 +440,115 @@ function addUserMessage(message) {
 }
 
 // Sample data functions for sidebar buttons
-function insertSampleData() {
-    const sampleQueries = [
-        "INSERT INTO super_heroes (name, secret_identity, powers) VALUES ('Batman', 'Bruce Wayne', 'intelligence, martial arts');",
-        "INSERT INTO super_heroes (name, secret_identity, powers) VALUES ('Wonder Woman', 'Diana Prince', 'super strength, flight, combat');",
-        "INSERT INTO super_heroes (name, secret_identity, powers) VALUES ('Spider-Man', 'Peter Parker', 'wall-crawling, spider-sense, agility');"
-    ];
-    
-    const randomQuery = sampleQueries[Math.floor(Math.random() * sampleQueries.length)];
-    addSystemMessage(`📝 Execute this SQL in your database to test CDC: ${randomQuery}`);
+function insertSampleData(exampleKey) {
+    const sql = getSqlExample('insert', exampleKey);
+    if (sql) {
+        showSqlInstruction(sql);
+    }
 }
 
-function updateSampleData() {
-    const sampleQueries = [
-        "UPDATE super_heroes SET powers = 'enhanced strength, flight, combat, leadership' WHERE name = 'Wonder Woman';",
-        "UPDATE super_heroes SET secret_identity = 'Miles Morales' WHERE name = 'Spider-Man';",
-        "UPDATE super_heroes SET powers = 'intelligence, martial arts, detective skills, gadgets' WHERE name = 'Batman';"
-    ];
-    
-    const randomQuery = sampleQueries[Math.floor(Math.random() * sampleQueries.length)];
-    addSystemMessage(`📝 Execute this SQL in your database to test CDC: ${randomQuery}`);
+function updateSampleData(exampleKey) {
+    const sql = getSqlExample('update', exampleKey);
+    if (sql) {
+        showSqlInstruction(sql);
+    }
 }
 
-function deleteSampleData() {
-    const sampleQueries = [
-        "DELETE FROM super_heroes WHERE name = 'Batman';",
-        "DELETE FROM super_heroes WHERE secret_identity = 'Bruce Wayne';",
-        "DELETE FROM super_heroes WHERE powers LIKE '%flight%';"
-    ];
-    
-    const randomQuery = sampleQueries[Math.floor(Math.random() * sampleQueries.length)];
-    addSystemMessage(`📝 Execute this SQL in your database to test CDC: ${randomQuery}`);
+function deleteSampleData(exampleKey) {
+    const sql = getSqlExample('delete', exampleKey);
+    if (sql) {
+        showSqlInstruction(sql);
+    }
+}
+
+function selectSampleData(exampleKey) {
+    const sql = getSqlExample('select', exampleKey);
+    if (sql) {
+        showSqlInstruction(sql);
+    }
+}
+
+function showSqlInstruction(sql) {
+    addSystemMessage(`📝 Execute this SQL in your database to test CDC:\n${sql}`);
+}
+
+function getSqlExample(category, exampleKey) {
+    const categoryExamples = SQL_EXAMPLES[category];
+
+    if (!categoryExamples) {
+        console.warn(`No SQL examples available for category: ${category}`);
+        return null;
+    }
+
+    if (exampleKey && categoryExamples[exampleKey]) {
+        return categoryExamples[exampleKey].sql;
+    }
+
+    const randomExample = getRandomExample(Object.values(categoryExamples));
+    return randomExample ? randomExample.sql : null;
+}
+
+function getRandomExample(examples) {
+    if (!examples.length) {
+        return null;
+    }
+
+    const index = Math.floor(Math.random() * examples.length);
+    return examples[index];
+}
+
+function copySQL(event, category, exampleKey) {
+    const sql = getSqlExample(category, exampleKey);
+    if (!sql) {
+        return;
+    }
+
+    event.stopPropagation();
+    const button = event.currentTarget;
+
+    const attemptClipboardWrite = () => {
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+            return navigator.clipboard.writeText(sql);
+        }
+        return Promise.reject(new Error('Clipboard API not available'));
+    };
+
+    attemptClipboardWrite()
+        .then(() => showCopyFeedback(button))
+        .catch(() => fallbackCopy(sql, button));
+}
+
+function fallbackCopy(sql, button) {
+    const textarea = document.createElement('textarea');
+    textarea.value = sql;
+    textarea.setAttribute('readonly', '');
+    textarea.style.position = 'absolute';
+    textarea.style.left = '-9999px';
+    document.body.appendChild(textarea);
+
+    textarea.select();
+    try {
+        document.execCommand('copy');
+        showCopyFeedback(button);
+    } catch (error) {
+        console.error('Failed to copy SQL to clipboard:', error);
+    } finally {
+        document.body.removeChild(textarea);
+    }
+}
+
+function showCopyFeedback(button) {
+    if (!button.dataset.defaultHtml) {
+        button.dataset.defaultHtml = button.innerHTML;
+    }
+
+    button.innerHTML = '<i class="fas fa-check"></i>';
+    button.classList.add('copied');
+
+    setTimeout(() => {
+        button.classList.remove('copied');
+        button.innerHTML = button.dataset.defaultHtml;
+    }, 1500);
 }
 
 // Utility functions
@@ -385,6 +564,8 @@ function formatJSON(jsonString) {
 window.insertSampleData = insertSampleData;
 window.updateSampleData = updateSampleData;
 window.deleteSampleData = deleteSampleData;
+window.selectSampleData = selectSampleData;
+window.copySQL = copySQL;
 window.sendMessage = sendMessage;
 window.submitNickname = submitNickname;
 window.editNickname = editNickname;
