@@ -9,6 +9,25 @@ let metricsUpdateInterval = null;
 
 // Initialize the application
 document.addEventListener('DOMContentLoaded', function() {
+    const themeToggle = document.getElementById('theme-toggle');
+    const htmlElement = document.documentElement;
+
+    // This function applies the theme and saves it to the browser's memory
+    const applyTheme = (theme) => {
+        htmlElement.setAttribute('data-theme', theme);
+        localStorage.setItem('theme', theme);
+    };
+
+    // When the page loads, immediately apply the saved theme or default to 'light'
+    const savedTheme = localStorage.getItem('theme') || 'light';
+    applyTheme(savedTheme);
+
+    // This is the main click event that switches the theme
+    themeToggle.addEventListener('click', () => {
+        const currentTheme = htmlElement.getAttribute('data-theme');
+        const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+        applyTheme(newTheme);
+    });
     setupEventListeners();
     showNicknameModal();
     updateConnectionStatus('connecting', 'Waiting for nickname...');
@@ -410,38 +429,21 @@ function switchTab(tabName) {
 }
 
 function initializeDashboard() {
-    // Initialize CDC Activity Chart
     const ctx = document.getElementById('cdcActivityChart');
     if (ctx) {
+        // Check the current theme to set the correct colors for the chart
+        const isDarkMode = document.documentElement.getAttribute('data-theme') === 'dark';
+        const gridColor = isDarkMode ? 'rgba(255, 255, 255, 0.2)' : 'rgba(0, 0, 0, 0.1)';
+        const textColor = isDarkMode ? '#f9fafb' : '#64748b';
+
         cdcActivityChart = new Chart(ctx, {
             type: 'line',
             data: {
                 labels: [],
                 datasets: [
-                    {
-                        label: 'Create',
-                        data: [],
-                        borderColor: '#10b981',
-                        backgroundColor: 'rgba(16, 185, 129, 0.1)',
-                        tension: 0.4,
-                        fill: true
-                    },
-                    {
-                        label: 'Update',
-                        data: [],
-                        borderColor: '#f59e0b',
-                        backgroundColor: 'rgba(245, 158, 11, 0.1)',
-                        tension: 0.4,
-                        fill: true
-                    },
-                    {
-                        label: 'Delete',
-                        data: [],
-                        borderColor: '#ef4444',
-                        backgroundColor: 'rgba(239, 68, 68, 0.1)',
-                        tension: 0.4,
-                        fill: true
-                    }
+                    { label: 'Create', data: [], borderColor: '#10b981', backgroundColor: 'rgba(16, 185, 129, 0.1)', tension: 0.4, fill: true },
+                    { label: 'Update', data: [], borderColor: '#f59e0b', backgroundColor: 'rgba(245, 158, 11, 0.1)', tension: 0.4, fill: true },
+                    { label: 'Delete', data: [], borderColor: '#ef4444', backgroundColor: 'rgba(239, 68, 68, 0.1)', tension: 0.4, fill: true }
                 ]
             },
             options: {
@@ -450,14 +452,18 @@ function initializeDashboard() {
                 plugins: {
                     legend: {
                         position: 'bottom',
+                        labels: { color: textColor } // Use theme-aware text color
                     }
                 },
                 scales: {
                     y: {
                         beginAtZero: true,
-                        ticks: {
-                            stepSize: 1
-                        }
+                        ticks: { stepSize: 1, color: textColor }, // Use theme-aware text color
+                        grid: { color: gridColor } // Use theme-aware grid color
+                    },
+                    x: {
+                        ticks: { color: textColor }, // Use theme-aware text color
+                        grid: { color: gridColor } // Use theme-aware grid color
                     }
                 }
             }

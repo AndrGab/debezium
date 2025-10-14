@@ -10,10 +10,14 @@ services:
     networks:
       - debezium-compose-network
     depends_on:
-      - connect-debezium
-      - zookeeper-debezium
-      - kafka-debezium
-      - tester_db
+      kafka-debezium:
+        condition: service_healthy
+      connect-debezium:
+        condition: service_started
+      zookeeper-debezium:
+        condition: service_started
+      tester_db:
+        condition: service_started
 
   zookeeper-debezium:
     image: debezium/zookeeper:1.4
@@ -38,6 +42,11 @@ services:
      - ZOOKEEPER_CONNECT=zookeeper-debezium:2181
     networks:
       - debezium-compose-network
+    healthcheck:
+      test: ["CMD-SHELL", "ps aux | grep -v grep | grep Kafka"]
+      interval: 15s
+      timeout: 10s
+      retries: 10
 
   connect-debezium:
     image: debezium/connect:1.4

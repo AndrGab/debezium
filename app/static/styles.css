@@ -12,23 +12,62 @@
     --danger-color: #ef4444;
     --warning-color: #f59e0b;
     --success-color: #10b981;
+    
+    /* Light Theme Colors */
     --background: #f8fafc;
     --surface: #ffffff;
     --text-primary: #1e293b;
     --text-secondary: #64748b;
     --border: #e2e8f0;
+    --header-bg: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+    --header-text: #ffffff;
+    --welcome-bg: linear-gradient(135deg, #f0f9ff, #e0f2fe);
+    --welcome-border: #bae6fd;
+    --welcome-text: #0369a1;
+    --cdc-bg: linear-gradient(135deg, #f8fafc, #f1f5f9);
+    --create-label-bg: #dcfce7;
+    --create-label-text: #166534;
+    --update-label-bg: #fef3c7;
+    --update-label-text: #92400e;
+    --delete-label-bg: #fee2e2;
+    --delete-label-text: #991b1b;
     --shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
     --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
     --radius: 0.5rem;
     --radius-lg: 1rem;
+    --theme-transition-duration: 0.3s;
+}
+
+[data-theme="dark"] {
+    /* Dark Theme Colors */
+    --background: #111827;
+    --surface: #1f2937;
+    --text-primary: #f9fafb;
+    --text-secondary: #9ca3af;
+    --border: #374151;
+    --header-bg: #1f2937;
+    --header-text: #f9fafb;
+    --welcome-bg: linear-gradient(135deg, #1e2937, #111827);
+    --welcome-border: #374151;
+    --welcome-text: #9ca3af;
+    --cdc-bg: linear-gradient(135deg, #111827, #1f2937);
+    --create-label-bg: #052e16;
+    --create-label-text: #bbf7d0;
+    --update-label-bg: #422006;
+    --update-label-text: #fde68a;
+    --delete-label-bg: #450a0a;
+    --delete-label-text: #fecaca;
+    --shadow: 0 1px 3px 0 rgb(0 0 0 / 0.3), 0 1px 2px -1px rgb(0 0 0 / 0.3);
+    --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.3), 0 4px 6px -4px rgb(0 0 0 / 0.3);
 }
 
 body {
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     color: var(--text-primary);
     min-height: 100vh;
     line-height: 1.6;
+    background: var(--background);
+    transition: background-color var(--theme-transition-duration) ease, color var(--theme-transition-duration) ease;
 }
 
 /* App Container */
@@ -38,13 +77,15 @@ body {
     min-height: 100vh;
     width: 100%;
     background: var(--surface);
+    transition: background-color var(--theme-transition-duration) ease;
 }
 
 /* Header */
 .header {
-    background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
-    color: white;
+    color: var(--header-text);
     box-shadow: var(--shadow);
+    background: var(--header-bg);
+    transition: background var(--theme-transition-duration) ease;
 }
 
 .header-content {
@@ -53,6 +94,12 @@ body {
     align-items: center;
     width: 100%;
     padding: 1rem 2rem;
+}
+
+.header-right {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem; 
 }
 
 .logo {
@@ -280,7 +327,7 @@ body {
 
 .message-item.cdc {
     border-left: 4px solid var(--primary-color);
-    background: linear-gradient(135deg, #f8fafc, #f1f5f9);
+    background: var(--cdc-bg);
 }
 
 @keyframes slideIn {
@@ -300,6 +347,7 @@ body {
     line-height: 1.5;
     white-space: pre-wrap;
     word-break: break-word;
+    color: var(--text-primary);
 }
 
 .message-meta {
@@ -323,18 +371,18 @@ body {
 }
 
 .message-type.create {
-    background: #dcfce7;
-    color: #166534;
+    background: var(--create-label-bg);
+    color: var(--create-label-text);
 }
 
 .message-type.update {
-    background: #fef3c7;
-    color: #92400e;
+    background: var(--update-label-bg);
+    color: var(--update-label-text);
 }
 
 .message-type.delete {
-    background: #fee2e2;
-    color: #991b1b;
+    background: var(--delete-label-bg);
+    color: var(--delete-label-text);
 }
 
 /* Input Container */
@@ -362,6 +410,7 @@ body {
     font-size: 0.875rem;
     transition: all 0.2s;
     background: var(--surface);
+    color: var(--text-primary);
 }
 
 .input-group input:focus {
@@ -486,6 +535,7 @@ body {
     cursor: pointer;
     transition: all 0.2s;
     text-align: left;
+    color: var(--text-primary);
 }
 
 .command-btn:hover {
@@ -1058,6 +1108,7 @@ body {
     font-size: 1rem;
     transition: all 0.2s;
     background: var(--surface);
+    color: var(--text-primary);
 }
 
 .form-group input:focus {
@@ -1444,4 +1495,35 @@ body {
 * {
     min-width: 0;
     min-height: 0;
+}
+.header-right {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem; 
+}
+
+/* Styles for the new button */
+.theme-toggle-button {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 5px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--header-text);
+    transition: background-color 0.2s ease, transform 0.2s ease;
+}
+
+.theme-toggle-button:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+    transform: scale(1.1);
+}
+
+.theme-toggle-button:active {
+    transform: scale(0.95);
+}
+#messageText, #nickname-input {
+    color: var(--text-primary);
 }

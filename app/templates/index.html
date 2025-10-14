@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="light">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -54,18 +54,25 @@
                     <i class="fas fa-database"></i>
                     <h1>Debezium Real-Time Chat</h1>
                 </div>
-                <div class="user-info">
-                    <div class="connection-status">
-                        <span class="status-indicator" id="connection-status"></span>
-                        <span id="connection-text">Connecting...</span>
+
+                <div class="header-right">
+                    <div class="user-info">
+                        <div class="connection-status">
+                            <span class="status-indicator" id="connection-status"></span>
+                            <span id="connection-text">Connecting...</span>
+                        </div>
+                        <div class="user-id">
+                            <i class="fas fa-user"></i>
+                            <span id="nickname-display">Guest</span>
+                            <button id="edit-nickname-btn" class="edit-nickname-btn" onclick="editNickname()" title="Edit Nickname">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                        </div>
                     </div>
-                    <div class="user-id">
-                        <i class="fas fa-user"></i>
-                        <span id="nickname-display">Guest</span>
-                        <button id="edit-nickname-btn" class="edit-nickname-btn" onclick="editNickname()" title="Edit Nickname">
-                            <i class="fas fa-edit"></i>
-                        </button>
-                    </div>
+
+                    <button id="theme-toggle" class="theme-toggle-button" aria-label="Toggle dark mode">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
+                    </button>
                 </div>
             </div>
             
